@@ -8,7 +8,7 @@
 ### OPTIONS AND VARIABLES ###
 
 dotfilesrepo="https://github.com/lukesmithxyz/voidrice.git"
-progsfile="https://raw.githubusercontent.com/LukeSmithxyz/LARBS/master/progs.csv"
+progsfile="https://raw.githubusercontent.com/cocojamb0/LARBSd/master/progs.csv"
 repobranch="master"
 
 ### FUNCTIONS ###
@@ -25,7 +25,7 @@ error() {
 
 welcomemsg() {
 	whiptail --title "Welcome!" \
-		--msgbox "Welcome to Luke's Auto-Rice Bootstrapping Script for Debian!\\n\\nThis script will automatically install a fully-featured Linux desktop, which I use as my main machine.\\n\\n" 10 60
+		--msgbox "Welcome to cocojamb0's Auto-Rice Bootstrapping Script for Debian!\\n\\nOriginally authored by Luke Smith, this modified script will automatically install a fully-featured Linux desktop, which I use as my main machine.\\n\\n" 10 60
 
 	whiptail --title "Important Note!" --yes-button "All ready!" \
 		--no-button "Return..." \
@@ -81,7 +81,7 @@ adduserandpass() {
 		whiptail --infobox "Refreshing Apt Keys..." 7 40
 		apt-key net-update >/dev/null 2>&1
 ;;
-#	*)
+	*)
 #		whiptail --infobox "Enabling Arch Repositories..." 7 40
 #		if ! grep -q "^\[universe\]" /etc/pacman.conf; then
 #			echo "[universe]
@@ -219,12 +219,12 @@ ntpdate 0.us.pool.ntp.org >/dev/null 2>&1
 
 adduserandpass || error "Error adding username and/or password."
 
-[ -f /etc/sudoers.pacnew ] && cp /etc/sudoers.pacnew /etc/sudoers # Just in case
+[ -f /etc/sudoers.new ] && cp /etc/sudoers.new /etc/sudoers # Just in case
 
 # Allow user to run sudo without password. Since AUR programs must be installed
 # in a fakeroot environment, this is required for all builds with AUR.
-trap 'rm -f /etc/sudoers.d/larbs-temp' HUP INT QUIT TERM PWR EXIT
-echo "%wheel ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/larbs-temp
+# trap 'rm -f /etc/sudoers.d/larbs-temp' HUP INT QUIT TERM PWR EXIT
+# echo "%wheel ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/larbs-temp
 
 # Use all cores for compilation.
 sed -i "s/-j2/-j$(nproc)/;/^#MAKEFLAGS/s/^#//" /etc/makepkg.conf
@@ -266,7 +266,7 @@ EndSection' >/etc/X11/xorg.conf.d/40-libinput.conf
 # Allow wheel users to sudo with password and allow several system commands
 # (like `shutdown` to run without password).
 echo "%wheel ALL=(ALL:ALL) ALL" >/etc/sudoers.d/00-larbs-wheel-can-sudo
-echo "%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/shutdown,/usr/bin/reboot,/usr/bin/systemctl suspend,/usr/bin/wifi-menu,/usr/bin/mount,/usr/bin/umount,/usr/bin/pacman -Syu,/usr/bin/pacman -Syyu,/usr/bin/pacman -Syyu --noconfirm,/usr/bin/loadkeys,/usr/bin/pacman -Syyuw --noconfirm,/usr/bin/pacman -S -u -y --config /etc/pacman.conf --,/usr/bin/pacman -S -y -u --config /etc/pacman.conf --" >/etc/sudoers.d/01-larbs-cmds-without-password
+echo "%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/shutdown,/usr/bin/reboot,/usr/bin/systemctl suspend,/usr/bin/wifi-menu,/usr/bin/mount,/usr/bin/umount,/usr/bin/apt update,/usr/bin/apt update -y,/usr/bin/loadkeys" >/etc/sudoers.d/01-larbs-cmds-without-password
 
 # Last message! Install complete!
 finalize
