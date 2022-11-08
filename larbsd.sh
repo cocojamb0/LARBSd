@@ -66,6 +66,7 @@ preinstallmsg() {
 adduserandpass() {
 	# Adds user `$name` with password $pass1.
 	whiptail --infobox "Adding user \"$name\"..." 7 50
+	groupadd wheel
 	useradd -m -g wheel -s /bin/zsh "$name" >/dev/null 2>&1 ||
 		usermod -a -G wheel "$name" && mkdir -p /home/"$name" && chown "$name":wheel /home/"$name"
 	export repodir="/home/$name/.local/src"
@@ -75,13 +76,13 @@ adduserandpass() {
 	unset pass1 pass2
 }
 
-#refreshkeys() {
-	case "$(readlink -f /sbin/init)" in
-	*systemd*)
-		whiptail --infobox "Refreshing Apt Keys..." 7 40
-		apt-key net-update >/dev/null 2>&1
-;;
-	*)
+# refreshkeys() {
+# 	case "$(readlink -f /sbin/init)" in
+# 	*systemd*)
+# 		whiptail --infobox "Refreshing Apt Keys..." 7 40
+# 		apt-key net-update >/dev/null 2>&1
+# ;;
+#	*)
 #		whiptail --infobox "Enabling Arch Repositories..." 7 40
 #		if ! grep -q "^\[universe\]" /etc/pacman.conf; then
 #			echo "[universe]
@@ -141,7 +142,7 @@ installationloop() {
 	([ -f "$progsfile" ] && cp "$progsfile" /tmp/progs.csv) ||
 		curl -Ls "$progsfile" | sed '/^#/d' >/tmp/progs.csv
 	total=$(wc -l </tmp/progs.csv)
-	aurinstalled=$(pacman -Qqm)
+	# aurinstalled=$(pacman -Qqm)
 	while IFS=, read -r tag program comment; do
 		n=$((n + 1))
 		echo "$comment" | grep -q "^\".*\"$" &&
@@ -204,8 +205,8 @@ preinstallmsg || error "User exited."
 ### The rest of the script requires no user input.
 
 # Refresh Debian apt keys.
-refreshkeys ||
-	error "Error automatically refreshing keys. Consider doing so manually."
+# refreshkeys ||
+# 	error "Error automatically refreshing keys. Consider doing so manually."
 
 for x in curl ca-certificates base-devel git ntp zsh; do
 	whiptail --title "LARBS'd Installation" \
@@ -227,6 +228,7 @@ adduserandpass || error "Error adding username and/or password."
 # echo "%wheel ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/larbs-temp
 
 # Use all cores for compilation.
+touch /etc/makepkg.conf
 sed -i "s/-j2/-j$(nproc)/;/^#MAKEFLAGS/s/^#//" /etc/makepkg.conf
 
 # The command that does all the installing. Reads the progs.csv file and
